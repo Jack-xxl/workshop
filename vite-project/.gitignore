@@ -22,3 +22,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Added common ignores
+# Environment files (should not be committed)
+.env
+.env.*
+
+# Build / cache folders
+.vite/
+.cache/
+.parcel-cache/
+
+# Coverage and test output
+.nyc_output/
+coverage/
+
+# Tool caches and misc
+.eslintcache
+*.tgz
+Thumbs.db

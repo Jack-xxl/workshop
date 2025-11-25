@@ -29,20 +29,20 @@
             <li>每周 1 次线上思维课（45分钟）</li>
             <li>每月线下工坊（90分钟）</li>
           </ul>
-          <div class="price">¥4,800 <span>/ 半年</span></div>
+          <div class="price">¥4,800 <span>/ 16周</span></div>
         </div>
 
         <div class="plan">
           <div class="plan-hd">
             <span class="badge">🟡 项目实战</span>
-            <div class="title">10岁+ · 独立创作完成项目 · 解决真实问题 · 就业&创业启蒙</div>
+            <div class="title">10岁+ · 独立创作完成项目，模拟或真实创建微型公司 · 解决真实问题 · 就业&创业启蒙</div>
           </div>
           <ul class="plan-feats">
             <li>视频自学 + 每周线上思维课（60分钟）</li>
             <li>每周线下项目课（90分钟）</li>
           </ul>
-          <div class="price">¥7,800 <span>/ 半年</span></div>
-          <div class="price sub">¥14,800 <span>/ 全年</span></div>
+          <div class="price">¥8600 <span>/ 20周</span></div>
+          <div class="price sub">¥16,800 <span>/ 40周</span></div>
         </div>
 
         <div class="plan">
@@ -67,7 +67,7 @@
       <div class="stage">
         <div class="stage-badge">🟠 阶段一 · 兴趣启蒙（6–9岁）</div>
         <ul>
-          <li>学习 <strong>Scratch 编程</strong> + AI 趣味工具（AI绘画 / 语音识别 / 图像识别）</li>
+          <li>学习 <strong>Scratch 编程</strong> + AI 趣味工具（AI绘画 / 语音识别 / 图片视频生成）</li>
           <li>在 <strong>玩中学</strong>，培养逻辑思维 · 想象力 · 创造力 · 简单合作力</li>
           <li>每个孩子都能完成 2–3 个小作品，并生成 <strong>AI 成长档案</strong></li>
           <li class="hint">🌱 成果：点燃兴趣，建立科技自信，为阶段二打下基础</li>

@@ -2,7 +2,7 @@
   <div style="max-width: 800px; margin: 0 auto; padding: 28px;">
     <h2 style="font-size:1.5em; margin-bottom:1em;">企业孵化与合作</h2>
     <p style="margin-bottom:1.5em;">
-      AI智能坊不仅是学习和成长的平台，更是青少年创新项目的“孵化器”和社会实践入口。我们面向学员、家长、企业、投资人，开放多元合作，共创未来！
+      AI创变营不仅是学习和成长的平台，更是青少年创新项目的“孵化器”和社会实践入口。我们面向学员、家长、企业、投资人，开放多元合作，共创未来！
     </p>
 
     <div style="background:#e8f1ff; border-radius:10px; padding: 22px; margin-bottom:28px;">
