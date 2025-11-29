@@ -1,5 +1,7 @@
 // src/services/authService.js
-const API_BASE = "http://localhost:3100/api/auth";
+// Use VITE_API_BASE in production (Render), fall back to localhost in dev
+const API_BASE =
+  (import.meta.env.VITE_API_BASE || "http://localhost:3100") + "/api/auth";
 
 export async function login(username, password) {
   const resp = await fetch(`${API_BASE}/login`, {

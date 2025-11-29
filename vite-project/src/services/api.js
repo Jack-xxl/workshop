@@ -2,9 +2,12 @@
 import axios from "axios";
 import { getAuthToken } from "./authService";
 
+// Backend base URL: Render in production, localhost in dev
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3100";
+
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: "/api", // Uses Vite proxy
+  baseURL: `${API_BASE}/api`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -39,6 +42,9 @@ api.interceptors.response.use(
 );
 
 // Helper function for fetch requests with auth token
+// `url` can be:
+// - absolute ("http://..." or "https://...")
+// - or backend-relative ("/api/xxx")
 export async function fetchWithAuth(url, options = {}) {
   const token = getAuthToken();
   const headers = {
@@ -54,7 +60,10 @@ export async function fetchWithAuth(url, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
+  const isAbsolute = /^https?:\/\//i.test(url);
+  const fullUrl = isAbsolute ? url : `${API_BASE}${url}`;
+
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
@@ -71,4 +80,7 @@ export async function fetchWithAuth(url, options = {}) {
 }
 
 export default api;
+
+// Export base URL for other modules if needed
+export { API_BASE };
 

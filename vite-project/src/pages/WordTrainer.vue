@@ -349,8 +349,9 @@ const LS_THEME = "wordTrainerTheme";
 const LS_STORY = "wordTrainerStoryConfig";
 const LS_CARD = "wordTrainerCardConfig";
 
-// API 基础
-const API_BASE = "http://localhost:3100/api/words";
+// API 基础：Render or localhost
+const API_BASE =
+  (import.meta.env.VITE_API_BASE || "http://localhost:3100") + "/api/words";
 
 // 导师信息（从 localStorage 读取）
 const agentProfile = ref(null);
