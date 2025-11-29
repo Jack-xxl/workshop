@@ -1,6 +1,7 @@
 // src/router.js
 import { createRouter, createWebHistory } from "vue-router";
 import { getAuthToken, isAuthenticated } from "./services/authService";
+import { fetchWithAuth } from "./services/api";
 
 import Login from "./pages/Login.vue";
 
@@ -149,12 +150,9 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Server check: has username/password changed (authVersion mismatch)?
+  // Server check: has username/password changed (authVersion mismatch)?
   try {
-    const resp = await fetch("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const resp = await fetchWithAuth("/api/auth/me");
 
     if (!resp.ok) {
       throw new Error("Unauthorized");
