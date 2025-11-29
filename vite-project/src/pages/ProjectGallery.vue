@@ -30,6 +30,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { fetchWithAuth } from "../services/api";
 
 const router = useRouter();
 const projects = ref([]);
@@ -40,7 +41,7 @@ onMounted(loadProjects);
 async function loadProjects() {
   loading.value = true;
   try {
-    const res = await fetch("/api/projects");
+    const res = await fetchWithAuth("/api/projects");
     const data = await res.json();
     projects.value = Array.isArray(data)
       ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))

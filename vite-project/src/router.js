@@ -1,8 +1,8 @@
 // src/router.js
 import { createRouter, createWebHistory } from "vue-router";
+import { getAuthToken, isAuthenticated } from "./services/authService";
 
 import Login from "./pages/Login.vue";
-import Register from "./pages/Register.vue";
 
 import Home from "./pages/Home.vue";
 import Faq from "./pages/Faq.vue";
@@ -34,24 +34,24 @@ import WordTrainer from "./pages/WordTrainer.vue";
 import Playground from "./pages/Playground.vue";
 
 const routes = [
-  { path: "/login", component: Login },
-  { path: "/register", component: Register },
+  { path: "/login", component: Login, meta: { requiresAuth: false } },
 
-  { path: "/", component: Home },
-  { path: "/faq", component: Faq },
-  { path: "/courses", component: Courses },
-  { path: "/showcase", component: Showcase },
-  { path: "/incubation", component: Incubation },
-  { path: "/signup", component: Signup },
-  { path: "/trial", component: Trial },
-  { path: "/about", component: About },
-  { path: "/ai-ask", component: AskAi },
+  { path: "/", component: Home, meta: { requiresAuth: true } },
+  { path: "/faq", component: Faq, meta: { requiresAuth: true } },
+  { path: "/courses", component: Courses, meta: { requiresAuth: true } },
+  { path: "/showcase", component: Showcase, meta: { requiresAuth: true } },
+  { path: "/incubation", component: Incubation, meta: { requiresAuth: true } },
+  { path: "/signup", component: Signup, meta: { requiresAuth: true } },
+  { path: "/trial", component: Trial, meta: { requiresAuth: true } },
+  { path: "/about", component: About, meta: { requiresAuth: true } },
+  { path: "/ai-ask", component: AskAi, meta: { requiresAuth: true } },
 
   // AI 智能体创造中心
   {
     path: "/creator",
     name: "CreatorHub",
     component: CreatorHub,
+    meta: { requiresAuth: true },
   },
 
   // 创建具体 AI 项目
@@ -59,6 +59,7 @@ const routes = [
     path: "/creator/create",
     name: "ProjectCreate",
     component: ProjectCreate,
+    meta: { requiresAuth: true },
   },
 
   // AI 作品展示墙
@@ -66,6 +67,7 @@ const routes = [
     path: "/gallery",
     name: "ProjectGallery",
     component: ProjectGallery,
+    meta: { requiresAuth: true },
   },
 
   // 单个 AI 作品详情
@@ -73,6 +75,7 @@ const routes = [
     path: "/project/:id",
     name: "ProjectDetail",
     component: ProjectDetail,
+    meta: { requiresAuth: true },
   },
 
   // 学习型 AI 助手：听说读写 + 错题本
@@ -80,6 +83,7 @@ const routes = [
     path: "/study-agent",
     name: "StudyAgent",
     component: StudyAgent,
+    meta: { requiresAuth: true },
   },
 
   // AI 小助手创作工坊
@@ -87,6 +91,7 @@ const routes = [
     path: "/agent-builder",
     name: "AgentBuilder",
     component: AgentBuilder,
+    meta: { requiresAuth: true },
   },
 
   // AI 单词机：配置向导
@@ -94,6 +99,7 @@ const routes = [
     path: "/word-builder",
     name: "WordBuilder",
     component: WordBuilder,
+    meta: { requiresAuth: true },
   },
 
   // AI 单词机：训练中心
@@ -101,6 +107,7 @@ const routes = [
     path: "/word-trainer",
     name: "WordTrainer",
     component: WordTrainer,
+    meta: { requiresAuth: true },
   },
 
   // 学习版 Playground
@@ -108,12 +115,59 @@ const routes = [
     path: "/playground",
     name: "Playground",
     component: Playground,
+    meta: { requiresAuth: true },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Authentication guard
+router.beforeEach(async (to, from, next) => {
+  const token = getAuthToken();
+  // Check if route requires authentication (defaults to true if not specified)
+  const requiresAuth = to.matched.some(
+    (record) => record.meta.requiresAuth !== false
+  );
+
+  // Public routes (e.g. /login)
+  if (!requiresAuth) {
+    // If already logged in and trying to access login, go home
+    if (to.path === "/login" && token && isAuthenticated()) {
+      return next({ path: "/" });
+    }
+    return next();
+  }
+
+  // No token or expired token → force login
+  if (!token || !isAuthenticated()) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("currentUser");
+    return next({ path: "/login", query: { redirect: to.fullPath } });
+  }
+
+  // Server check: has username/password changed (authVersion mismatch)?
+  try {
+    const resp = await fetch("/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!resp.ok) {
+      throw new Error("Unauthorized");
+    }
+
+    // Token is valid on server → allow navigation
+    return next();
+  } catch (e) {
+    // Backend rejected token (e.g. after password/username change)
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("currentUser");
+    return next({ path: "/login", query: { redirect: to.fullPath } });
+  }
 });
 
 export default router;

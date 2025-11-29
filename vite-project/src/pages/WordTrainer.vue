@@ -340,6 +340,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { userKey } from "../services/userStorage";
+import { fetchWithAuth } from "../services/api";
 
 // Playground 对应的 localStorage key
 const LS_AUDIO = "wordTrainerAudioConfig";
@@ -867,9 +868,8 @@ async function importWords() {
   let items = [];
 
   try {
-    const resp = await fetch(`${API_BASE}/lookup`, {
+    const resp = await fetchWithAuth(`${API_BASE}/lookup`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ words: toLookup }),
     });
     const data = await resp.json();
@@ -916,11 +916,8 @@ async function importWords() {
 
 // AI 调用封装（用于 family/story/quiz/summary）
 async function callWordsApi(endpoint, payload) {
-  const resp = await fetch(`${API_BASE}/${endpoint}`, {
+  const resp = await fetchWithAuth(`${API_BASE}/${endpoint}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
   const data = await resp.json();

@@ -7,9 +7,10 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const { apiLimiter } = require("./middleware/rateLimiting");
+const { router: authRouter, authMiddleware } = require("./routes/auth");
 
 // 路由模块
-const askRouter = require("./routes/askai");      // 英语/学习问答
+const askRouter = require("./routes/askAI");      // 英语/学习问答
 const projectRouter = require("./routes/projects"); // AI 作品存储
 const agentRouter = require("./routes/agent");     // StudyAgent：语音/图片/聊天
 const wordsRouter = require("./routes/words");     // 单词机：故事/词族/测验/总结
@@ -49,6 +50,29 @@ app.use(express.json({ limit: "10mb" }));
 // 静态托管上传图片
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// =======================
+// 🔐 认证路由（必须在中间件之前，允许未登录访问）
+// =======================
+app.use("/api/auth", authRouter);
+
+// =======================
+// 🛡️ 认证中间件：保护所有 API 路由（除了 /api/auth/login 和 /health）
+// =======================
+app.use((req, res, next) => {
+  // 允许访问登录接口和健康检查
+  if (req.path === "/api/auth/login" || req.path === "/health") {
+    return next();
+  }
+  // 允许访问静态文件
+  if (req.path.startsWith("/uploads/")) {
+    return next();
+  }
+  // 其他所有 API 路由都需要认证
+  if (req.path.startsWith("/api/") || req.path.startsWith("/ask")) {
+    return authMiddleware(req, res, next);
+  }
+  next();
+});
 
 // =======================
 // 🧩 业务路由
@@ -148,7 +172,25 @@ app.use("*", (req, res) => {
 // =======================
 // 启动服务
 // =======================
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`API server running on http://localhost:${PORT}`);
   console.log(`FRONTEND_URL allowed origin: ${FRONTEND_URL}`);
+});
+
+// 处理端口占用错误
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Error: Port ${PORT} is already in use!`);
+    console.error(`\nTo fix this, you can:`);
+    console.error(`1. Stop the existing process using port ${PORT}:`);
+    console.error(`   netstat -ano | findstr ":${PORT}"`);
+    console.error(`   Then kill the process: Stop-Process -Id <PID> -Force`);
+    console.error(`\n2. Or use a different port by setting PORT in .env file`);
+    console.error(`\n3. Or run this PowerShell command to find and kill the process:`);
+    console.error(`   Get-NetTCPConnection -LocalPort ${PORT} | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force }`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+    process.exit(1);
+  }
 });

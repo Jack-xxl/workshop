@@ -129,6 +129,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { fetchWithAuth } from "../services/api";
 
 // 顶部标签
 const tabs = [
@@ -386,9 +387,8 @@ async function sendText() {
   inputText.value = "";
 
   try {
-    const resp = await fetch("http://localhost:3100/api/agent/chat", {
+    const resp = await fetchWithAuth("/api/agent/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text: content,
         mode: activeTab.value, // speaking / listening / ...
@@ -434,7 +434,7 @@ async function handleImageUpload(event) {
   form.append("image", file);
 
   try {
-    const resp = await fetch("http://localhost:3100/api/agent/upload-image", {
+    const resp = await fetchWithAuth("/api/agent/upload-image", {
       method: "POST",
       body: form,
     });

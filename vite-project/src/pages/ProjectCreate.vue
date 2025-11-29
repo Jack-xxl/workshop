@@ -67,6 +67,7 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { fetchWithAuth } from "../services/api";
 
 const route = useRoute();
 const router = useRouter();
@@ -108,9 +109,8 @@ async function handleAsk() {
   }
 
   try {
-    const res = await fetch("/api/ask", {
+    const res = await fetchWithAuth("/api/ask", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         question,
         age: form.age,
@@ -136,9 +136,8 @@ async function handleSave() {
   saveMessage.value = "";
 
   try {
-    const res = await fetch("/api/projects", {
+    const res = await fetchWithAuth("/api/projects", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: form.title,
         author: "营员同学", // 后期可替换成登录账号名

@@ -1,68 +1,34 @@
 // backend/routes/auth.js
+// Single shared username/password authentication system
 const express = require("express");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { readJson, writeJson } = require("../utils/jsonDb");
 
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-const USERS_FILE = "users.json";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
+const AUTH_VERSION = `${ADMIN_USERNAME}:${ADMIN_PASSWORD}`;
 
-// 生成 token
-function signToken(user) {
+// Warn if using default password
+if (ADMIN_PASSWORD === "changeme") {
+  console.warn("⚠️  WARNING: Using default password 'changeme'. Please set ADMIN_PASSWORD in .env file!");
+}
+
+// 生成 token（包含当前用户名/密码版本）
+function signToken() {
   return jwt.sign(
     {
-      id: user.id,
-      username: user.username,
+      username: ADMIN_USERNAME,
+      authVersion: AUTH_VERSION,
     },
     JWT_SECRET,
     { expiresIn: "7d" }
   );
 }
 
-// 注册
-router.post("/register", async (req, res) => {
-  try {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ ok: false, error: "用户名和密码不能为空" });
-    }
-
-    const users = readJson(USERS_FILE);
-
-    if (users.find((u) => u.username === username)) {
-      return res
-        .status(400)
-        .json({ ok: false, error: "该用户名已被占用" });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: Date.now().toString(), // 简单 id
-      username,
-      passwordHash: hash,
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
-    writeJson(USERS_FILE, users);
-
-    const token = signToken(newUser);
-    res.json({
-      ok: true,
-      token,
-      user: { id: newUser.id, username: newUser.username },
-    });
-  } catch (err) {
-    console.error("register error", err);
-    res.status(500).json({ ok: false, error: "服务器内部错误" });
-  }
-});
-
 // 登录
-router.post("/login", async (req, res) => {
+router.post("/login", (req, res) => {
   try {
     const { username, password } = req.body || {};
     if (!username || !password) {
@@ -71,26 +37,18 @@ router.post("/login", async (req, res) => {
         .json({ ok: false, error: "用户名和密码不能为空" });
     }
 
-    const users = readJson(USERS_FILE);
-    const user = users.find((u) => u.username === username);
-    if (!user) {
+    // Validate against environment variables
+    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
       return res
         .status(400)
         .json({ ok: false, error: "用户名或密码错误" });
     }
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) {
-      return res
-        .status(400)
-        .json({ ok: false, error: "用户名或密码错误" });
-    }
-
-    const token = signToken(user);
+    const token = signToken();
     res.json({
       ok: true,
       token,
-      user: { id: user.id, username: user.username },
+      user: { username: ADMIN_USERNAME },
     });
   } catch (err) {
     console.error("login error", err);
@@ -107,7 +65,13 @@ function authMiddleware(req, res, next) {
   }
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.user = payload; // { id, username }
+    // 如果 .env 中的用户名或密码已更改，则强制重新登录
+    if (payload.authVersion !== AUTH_VERSION) {
+      return res
+        .status(401)
+        .json({ ok: false, error: "登录信息已更新，请重新登录" });
+    }
+    req.user = payload; // { username, authVersion }
     next();
   } catch (e) {
     return res.status(401).json({ ok: false, error: "登录已失效，请重新登录" });
@@ -118,7 +82,7 @@ function authMiddleware(req, res, next) {
 router.get("/me", authMiddleware, (req, res) => {
   res.json({
     ok: true,
-    user: { id: req.user.id, username: req.user.username },
+    user: { username: req.user.username },
   });
 });
 
