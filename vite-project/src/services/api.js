@@ -2,8 +2,11 @@
 import axios from "axios";
 import { getAuthToken } from "./authService";
 
-// Backend base URL: Render in production, localhost in dev
+// Backend base URL: Render in production, localhost in dev (fallback)
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3100";
+
+// Helpful for debugging in the browser console
+console.log("[API] API_BASE =", API_BASE);
 
 // Create axios instance with base configuration
 const api = axios.create({
