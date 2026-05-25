@@ -35,10 +35,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid, redirect to login
       localStorage.removeItem("authToken");
       localStorage.removeItem("currentUser");
-      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -75,7 +73,6 @@ export async function fetchWithAuth(url, options = {}) {
   if (response.status === 401) {
     localStorage.removeItem("authToken");
     localStorage.removeItem("currentUser");
-    window.location.href = "/login";
     throw new Error("Unauthorized");
   }
 

@@ -13,7 +13,7 @@
 
       <p class="tip">
         已有账号？
-        <router-link to="/login">立即登录</router-link>
+        <router-link to="/">进入首页</router-link>
       </p>
 
       <p v-if="message" class="msg">{{ message }}</p>
@@ -49,8 +49,8 @@ function handleRegister() {
   db[email.value] = { email: email.value, password: password.value };
   localStorage.setItem("user-db", JSON.stringify(db));
 
-  message.value = "✅ 注册成功！正在跳转到登录...";
-  setTimeout(() => router.push("/login"), 800);
+  message.value = "✅ 注册成功！正在进入首页...";
+  setTimeout(() => router.push("/"), 800);
 }
 </script>
 
